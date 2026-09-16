@@ -108,7 +108,22 @@ export const WorkerManagementPage: React.FC<WorkerManagementPageProps> = ({
     try {
       const detailed = await adminService.getWorkerDetails(worker.id);
       if (detailed) {
-        setSelectedWorkerForDetails((prev) => (prev && prev.id === worker.id ? { ...prev, ...detailed } : detailed));
+        const normalizedLocation = typeof detailed.location === 'string'
+          ? detailed.location
+          : (detailed.currentAddress
+              ? `${detailed.currentAddress}${detailed.city ? `, ${detailed.city}` : ''}`
+              : (typeof detailed.location === 'object' && detailed.location !== null
+                  ? [detailed.location.currentAddress, detailed.location.city, detailed.location.pincode].filter(Boolean).join(', ')
+                  : (worker.location || 'New Delhi')));
+
+        setSelectedWorkerForDetails((prev) => (prev && prev.id === worker.id ? {
+          ...prev,
+          ...detailed,
+          location: normalizedLocation
+        } : {
+          ...detailed,
+          location: normalizedLocation
+        }));
       }
     } catch (err) {
       console.warn('[WorkerManagementPage] Live dossier fetch notice:', err);
@@ -199,7 +214,13 @@ export const WorkerManagementPage: React.FC<WorkerManagementPageProps> = ({
             gender: w.gender || '',
             email: w.email || w.userId?.email || '',
             joinedDate: joined,
-            location: w.location || (w.currentAddress ? `${w.currentAddress}${w.city ? `, ${w.city}` : ''}` : (w.addressLine || w.serviceArea || 'New Delhi')),
+            location: typeof w.location === 'string'
+              ? w.location
+              : (w.currentAddress
+                  ? `${w.currentAddress}${w.city ? `, ${w.city}` : ''}`
+                  : (typeof w.location === 'object' && w.location !== null
+                      ? [w.location.currentAddress, w.location.city, w.location.pincode].filter(Boolean).join(', ')
+                      : (w.addressLine || w.serviceArea || 'New Delhi'))),
             serviceArea: w.serviceArea || (w.city ? `${w.city} & Surrounding Areas` : 'Delhi NCR & Surrounding Areas'),
             workingHours: workingHoursDisplay,
             approvalStatus,

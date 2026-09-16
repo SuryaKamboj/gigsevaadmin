@@ -235,6 +235,15 @@ export const WorkerDetailsModal: React.FC<WorkerDetailsModalProps> = ({
     }
   };
 
+  const formatLocationString = (loc: any): string => {
+    if (!loc) return 'Not provided';
+    if (typeof loc === 'string') return loc;
+    if (typeof loc === 'object') {
+      return [loc.currentAddress, loc.city, loc.pincode].filter(Boolean).join(', ') || loc.serviceArea || 'Not provided';
+    }
+    return String(loc);
+  };
+
   return (
     <>
       <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150">
@@ -494,7 +503,7 @@ export const WorkerDetailsModal: React.FC<WorkerDetailsModalProps> = ({
                     <div className="sm:col-span-2">
                       <span className="text-[10px] uppercase font-bold text-[#5B6573] block">Designated Service Area</span>
                       <p className="text-[#1F2933] font-medium mt-0.5">{worker.serviceArea || 'Not provided'}</p>
-                      <p className="text-[10px] text-[#5B6573] mt-0.5">Base Station: {worker.location || 'Not provided'}</p>
+                      <p className="text-[10px] text-[#5B6573] mt-0.5">Base Station: {formatLocationString(worker.location)}</p>
                     </div>
 
                     <div>
@@ -699,7 +708,7 @@ export const WorkerDetailsModal: React.FC<WorkerDetailsModalProps> = ({
 
                     <div className="p-3 bg-[#F4F6F8] rounded-xs border border-[#D5DCE3] space-y-1">
                       <span className="text-[10px] uppercase font-bold text-[#5B6573] block">Base Station / Zone</span>
-                      <p className="font-semibold text-[#1F2933]">{worker.location || 'Not provided'}</p>
+                      <p className="font-semibold text-[#1F2933]">{formatLocationString(worker.location)}</p>
                     </div>
 
                     <div className="p-3 bg-[#F4F6F8] rounded-xs border border-[#D5DCE3] space-y-1">

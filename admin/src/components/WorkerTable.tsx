@@ -161,7 +161,13 @@ export const WorkerTable: React.FC<WorkerTableProps> = ({
                 <p className="text-[11px] text-[#1F2933] truncate" title={worker.serviceArea}>
                   {worker.serviceArea}
                 </p>
-                <span className="text-[10px] text-[#5B6573] truncate block">{worker.location}</span>
+                <span className="text-[10px] text-[#5B6573] truncate block">
+                  {typeof worker.location === 'string'
+                    ? worker.location
+                    : (typeof (worker.location as any) === 'object' && worker.location
+                        ? [(worker.location as any).currentAddress, (worker.location as any).city].filter(Boolean).join(', ')
+                        : 'Not provided')}
+                </span>
               </td>
 
               {/* Total Bookings (Inline text-first clickable element) */}
