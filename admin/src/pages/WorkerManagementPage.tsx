@@ -97,10 +97,23 @@ export const WorkerManagementPage: React.FC<WorkerManagementPageProps> = ({
     if (initialWorkerId) {
       const target = workers.find((w) => w.id.toLowerCase() === initialWorkerId.toLowerCase());
       if (target) {
-        setSelectedWorkerForDetails(target);
+        handleOpenWorkerDetails(target);
       }
     }
   }, [initialWorkerId, workers]);
+
+  // Open worker dossier and fetch live full canonical details from backend
+  const handleOpenWorkerDetails = async (worker: WorkerItem) => {
+    setSelectedWorkerForDetails(worker);
+    try {
+      const detailed = await adminService.getWorkerDetails(worker.id);
+      if (detailed) {
+        setSelectedWorkerForDetails((prev) => (prev && prev.id === worker.id ? { ...prev, ...detailed } : detailed));
+      }
+    } catch (err) {
+      console.warn('[WorkerManagementPage] Live dossier fetch notice:', err);
+    }
+  };
 
   // Fetch real workers from backend
   const fetchBackendWorkers = async () => {
@@ -117,12 +130,14 @@ export const WorkerManagementPage: React.FC<WorkerManagementPageProps> = ({
           const approvalStatus: WorkerApprovalStatus =
             kyc === 'VERIFIED' ? 'Approved' : kyc === 'REJECTED' ? 'Rejected' : 'Pending';
           const accountStatus: WorkerAccountStatus =
-            kyc === 'VERIFIED' ? 'Active' : 'Inactive';
+            kyc === 'VERIFIED' ? (w.availabilityStatus === 'SUSPENDED' ? 'Suspended' : 'Active') : 'Inactive';
 
-          const primaryCategory = w.primaryServiceCategory || w.skills?.[0]?.category || 'Electrician';
-          const skillList = Array.isArray(w.skills) && w.skills.length > 0
-            ? w.skills.map((s: any) => (typeof s === 'string' ? s : s.category || 'General Skill'))
-            : [primaryCategory];
+          const primaryCategory = w.primarySkill || w.primaryServiceCategory || w.skills?.[0]?.category || 'Electrician';
+          const skillList = Array.isArray(w.servicesOffered) && w.servicesOffered.length > 0
+            ? w.servicesOffered
+            : (Array.isArray(w.skills) && w.skills.length > 0
+                ? w.skills.map((s: any) => (typeof s === 'string' ? s : s.category || 'General Skill'))
+                : [primaryCategory]);
 
           const joined = w.createdAt
             ? new Date(w.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
@@ -130,54 +145,96 @@ export const WorkerManagementPage: React.FC<WorkerManagementPageProps> = ({
 
           const aadhaarMasked = w.aadhaarNumberMasked || w.privateData?.aadhaarNumberMasked || 'XXXX-XXXX-0124';
 
-          const rawImg = w.selfieUrl || w.avatarUrl;
+          const rawImg = w.avatarUrl || w.profilePhoto || w.image || w.selfieUrl;
           const validImg = rawImg && (rawImg.startsWith('http') || rawImg.startsWith('data:'))
             ? rawImg
             : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80';
 
+          const rawExp = w.yearsOfExperience !== undefined ? w.yearsOfExperience : (w.skills?.[0]?.experienceYears || 0);
+          const yearsOfExp = typeof rawExp === 'number' ? rawExp : parseInt(String(rawExp).replace(/\D/g, ''), 10) || 0;
+
+          const workingHoursDisplay = w.workingHours || (w.workingHoursStart && w.workingHoursEnd ? `${w.workingHoursStart} – ${w.workingHoursEnd}` : '09:00 AM – 06:00 PM');
+
+          const certs = Array.isArray(w.certifications) && w.certifications.length > 0
+            ? w.certifications.map((c: any, idx: number) => ({
+                id: c.id || `cert-${idx + 1}`,
+                name: typeof c === 'string' ? c : c.name || 'Trade Certificate',
+                issuer: c.issuer || '',
+                certificateNumber: c.certificateNumber || '',
+                documentUrl: c.documentUrl || '',
+                status: c.status || 'Verified',
+                issueDate: c.issueDate || '',
+                expiryDate: c.expiryDate || '',
+                verifiedDate: c.verifiedDate || '',
+                verifiedBy: c.verifiedBy || 'Admin Officer',
+                rejectionReason: c.rejectionReason || ''
+              }))
+            : [];
+
           return {
-            id: w.workerCode || w._id || `WRK-${Math.floor(1000 + Math.random() * 9000)}`,
-            name: w.fullName || 'Worker Applicant',
-            phone: w.userId?.mobileNumber || w.mobileNumber || w.phone || '+91 98765 00000',
+            id: w.workerCode || w.id || w._id || `WRK-${Math.floor(1000 + Math.random() * 9000)}`,
+            name: w.fullName || w.name || 'Worker Applicant',
+            phone: w.phone || w.userId?.mobileNumber || w.mobileNumber || '+91 98765 00000',
             image: validImg,
             category: primaryCategory,
+            primarySkill: primaryCategory,
             skills: skillList,
-            yearsOfExperience: 3,
+            yearsOfExperience: yearsOfExp,
+            skillLevel: w.skillLevel || 'Intermediate',
+            servicesOffered: skillList,
+            toolsAndEquipment: Array.isArray(w.toolsAndEquipment) ? w.toolsAndEquipment : [],
+            availableDays: Array.isArray(w.availableDays) ? w.availableDays : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+            workingHoursStart: w.workingHoursStart || '09:00',
+            workingHoursEnd: w.workingHoursEnd || '18:00',
+            workType: w.workType || 'Full-time',
+            aboutMe: w.aboutMe || '',
+            previousWorkExperience: w.previousWorkExperience || '',
+            trainingCompleted: Array.isArray(w.trainingCompleted) ? w.trainingCompleted : [],
+            portfolio: Array.isArray(w.portfolio) ? w.portfolio : [],
+            currentAddress: w.currentAddress || w.addressLine || '',
+            city: w.city || '',
+            pincode: w.pincode || '',
+            preferredWorkingAreas: Array.isArray(w.preferredWorkingAreas) ? w.preferredWorkingAreas : [primaryCategory],
+            dateOfBirth: w.dateOfBirth || '',
+            gender: w.gender || '',
+            email: w.email || w.userId?.email || '',
             joinedDate: joined,
-            location: w.addressLine || w.serviceArea || 'New Delhi',
-            serviceArea: w.serviceArea || 'Delhi NCR & Surrounding Areas',
-            workingHours: '09:00 AM – 07:00 PM',
+            location: w.location || (w.currentAddress ? `${w.currentAddress}${w.city ? `, ${w.city}` : ''}` : (w.addressLine || w.serviceArea || 'New Delhi')),
+            serviceArea: w.serviceArea || (w.city ? `${w.city} & Surrounding Areas` : 'Delhi NCR & Surrounding Areas'),
+            workingHours: workingHoursDisplay,
             approvalStatus,
             rejectionReason: w.rejectionReason,
             aadhaarNumberMasked: aadhaarMasked,
             aadhaarVerified: w.aadhaarVerified !== false,
-            selfieUrl: w.selfieUrl || w.avatarUrl,
+            selfieUrl: w.selfieUrl || validImg,
             status: accountStatus,
             profileCompletion: kyc === 'VERIFIED' ? 100 : 75,
-            adminRemarks: '',
-            certifications: [],
-            insurance: {
+            adminRemarks: w.rejectionReason || '',
+            certifications: certs,
+            insurance: w.insurance || {
               status: 'Not Applied',
               planName: 'Basic Worker Protection',
               coverage: '₹2,00,000'
             },
-            activityLogs: [
-              {
-                id: `log-init-${w._id}`,
-                date: joined,
-                time: '10:00 AM',
-                action: 'Application Submitted',
-                details: `Worker applied with Aadhaar ${aadhaarMasked}`,
-                performedBy: 'System'
-              }
-            ],
-            totalJobs: w.metrics?.completedJobsCount || 0,
-            completedJobs: w.metrics?.completedJobsCount || 0,
+            activityLogs: Array.isArray(w.activityLogs) && w.activityLogs.length > 0
+              ? w.activityLogs
+              : [
+                  {
+                    id: `log-init-${w._id || w.id}`,
+                    date: joined,
+                    time: '10:00 AM',
+                    action: 'Application Submitted',
+                    details: `Worker applied with Aadhaar ${aadhaarMasked}`,
+                    performedBy: 'System'
+                  }
+                ],
+            totalJobs: w.totalJobs || w.metrics?.completedJobsCount || 0,
+            completedJobs: w.completedJobs || w.metrics?.completedJobsCount || 0,
             cancelledJobs: 0,
-            averageRating: w.metrics?.averageRating || 5.0,
-            totalRatings: w.metrics?.reviewCount || 0,
+            averageRating: w.averageRating || w.metrics?.averageRating || 5.0,
+            totalRatings: w.totalRatings || w.metrics?.reviewCount || 0,
             complaintsCount: 0,
-            reviews: []
+            reviews: Array.isArray(w.reviews) ? w.reviews : []
           };
         });
 
@@ -832,7 +889,7 @@ export const WorkerManagementPage: React.FC<WorkerManagementPageProps> = ({
                   <WorkerTable
                     workers={paginatedWorkers}
                     jobs={jobs}
-                    onViewDetails={(worker) => setSelectedWorkerForDetails(worker)}
+                    onViewDetails={handleOpenWorkerDetails}
                     onApprove={handleApproveWorker}
                     onReject={handleOpenRejectModal}
                     onNavigateToJobs={(workerId) => onNavigateToJobFiltered && onNavigateToJobFiltered(workerId)}
@@ -845,7 +902,7 @@ export const WorkerManagementPage: React.FC<WorkerManagementPageProps> = ({
                       key={worker.id}
                       worker={worker}
                       jobs={jobs}
-                      onViewDetails={(w) => setSelectedWorkerForDetails(w)}
+                      onViewDetails={handleOpenWorkerDetails}
                       onApprove={handleApproveWorker}
                       onReject={handleOpenRejectModal}
                       onNavigateToJobs={(workerId) => onNavigateToJobFiltered && onNavigateToJobFiltered(workerId)}
@@ -862,7 +919,7 @@ export const WorkerManagementPage: React.FC<WorkerManagementPageProps> = ({
                     key={worker.id}
                     worker={worker}
                     jobs={jobs}
-                    onViewDetails={(w) => setSelectedWorkerForDetails(w)}
+                    onViewDetails={handleOpenWorkerDetails}
                     onApprove={handleApproveWorker}
                     onReject={handleOpenRejectModal}
                     onNavigateToJobs={(workerId) => onNavigateToJobFiltered && onNavigateToJobFiltered(workerId)}

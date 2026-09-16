@@ -22,6 +22,11 @@ export const adminService = {
     return res;
   },
 
+  async getWorkerDetails(workerId: string) {
+    const res = await api.get(`/admin/workers/${workerId}`);
+    return res?.data?.worker || res?.data || res?.worker || res;
+  },
+
   async updateWorkerKyc(workerId: string, status: 'VERIFIED' | 'REJECTED', notes?: string) {
     const res = await api.put(`/admin/workers/${workerId}/kyc`, {
       status,

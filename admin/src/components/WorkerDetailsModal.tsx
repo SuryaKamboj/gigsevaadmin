@@ -27,7 +27,27 @@ import {
   Save,
   CheckCircle2,
   XCircle,
+  Wrench,
+  MapPin,
+  Calendar,
+  Camera,
+  BookOpen,
+  Mail,
 } from 'lucide-react';
+
+export type DossierTab =
+  | 'profile'
+  | 'services'
+  | 'preferences'
+  | 'location'
+  | 'bio'
+  | 'certifications'
+  | 'portfolio'
+  | 'verification'
+  | 'insurance'
+  | 'remarks'
+  | 'activity'
+  | 'performance';
 
 interface WorkerDetailsModalProps {
   isOpen: boolean;
@@ -68,8 +88,9 @@ export const WorkerDetailsModal: React.FC<WorkerDetailsModalProps> = ({
   onApproveWorker,
   onRejectWorker,
 }) => {
-  const [activeTab, setActiveTab] = useState<'profile' | 'certifications' | 'insurance' | 'remarks' | 'activity' | 'performance'>('profile');
+  const [activeTab, setActiveTab] = useState<DossierTab>('profile');
   const [isPhotoLightboxOpen, setIsPhotoLightboxOpen] = useState(false);
+  const [selectedPortfolioItem, setSelectedPortfolioItem] = useState<{ url: string; title: string } | null>(null);
 
   // Sub-modal states
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
@@ -252,13 +273,13 @@ export const WorkerDetailsModal: React.FC<WorkerDetailsModalProps> = ({
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex border-b border-[#D5DCE3] bg-[#F4F6F8] px-4 pt-2 gap-1.5 overflow-x-auto select-none">
+          <div className="flex border-b border-[#D5DCE3] bg-[#F4F6F8] px-4 pt-2 gap-1.5 overflow-x-auto select-none scrollbar-thin">
             <button
               type="button"
               onClick={() => setActiveTab('profile')}
               className={`px-3 py-2 text-xs font-bold rounded-t-xs transition-colors cursor-pointer border-t border-x whitespace-nowrap ${
                 activeTab === 'profile'
-                  ? 'bg-white text-[#12355B] border-[#D5DCE3] border-b-white -mb-px'
+                  ? 'bg-white text-[#12355B] border-[#D5DCE3] border-b-white -mb-px shadow-xs'
                   : 'text-[#5B6573] border-transparent hover:text-[#12355B]'
               }`}
             >
@@ -266,58 +287,124 @@ export const WorkerDetailsModal: React.FC<WorkerDetailsModalProps> = ({
             </button>
             <button
               type="button"
-              onClick={() => setActiveTab('certifications')}
+              onClick={() => setActiveTab('services')}
               className={`px-3 py-2 text-xs font-bold rounded-t-xs transition-colors cursor-pointer border-t border-x whitespace-nowrap ${
-                activeTab === 'certifications'
-                  ? 'bg-white text-[#12355B] border-[#D5DCE3] border-b-white -mb-px'
+                activeTab === 'services'
+                  ? 'bg-white text-[#12355B] border-[#D5DCE3] border-b-white -mb-px shadow-xs'
                   : 'text-[#5B6573] border-transparent hover:text-[#12355B]'
               }`}
             >
-              2. Certifications ({worker.certifications.length})
+              2. Services & Tools
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('preferences')}
+              className={`px-3 py-2 text-xs font-bold rounded-t-xs transition-colors cursor-pointer border-t border-x whitespace-nowrap ${
+                activeTab === 'preferences'
+                  ? 'bg-white text-[#12355B] border-[#D5DCE3] border-b-white -mb-px shadow-xs'
+                  : 'text-[#5B6573] border-transparent hover:text-[#12355B]'
+              }`}
+            >
+              3. Work Preferences
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('location')}
+              className={`px-3 py-2 text-xs font-bold rounded-t-xs transition-colors cursor-pointer border-t border-x whitespace-nowrap ${
+                activeTab === 'location'
+                  ? 'bg-white text-[#12355B] border-[#D5DCE3] border-b-white -mb-px shadow-xs'
+                  : 'text-[#5B6573] border-transparent hover:text-[#12355B]'
+              }`}
+            >
+              4. Location & Area
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('bio')}
+              className={`px-3 py-2 text-xs font-bold rounded-t-xs transition-colors cursor-pointer border-t border-x whitespace-nowrap ${
+                activeTab === 'bio'
+                  ? 'bg-white text-[#12355B] border-[#D5DCE3] border-b-white -mb-px shadow-xs'
+                  : 'text-[#5B6573] border-transparent hover:text-[#12355B]'
+              }`}
+            >
+              5. Professional Bio
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('certifications')}
+              className={`px-3 py-2 text-xs font-bold rounded-t-xs transition-colors cursor-pointer border-t border-x whitespace-nowrap ${
+                activeTab === 'certifications'
+                  ? 'bg-white text-[#12355B] border-[#D5DCE3] border-b-white -mb-px shadow-xs'
+                  : 'text-[#5B6573] border-transparent hover:text-[#12355B]'
+              }`}
+            >
+              6. Certifications ({worker.certifications?.length || 0})
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('portfolio')}
+              className={`px-3 py-2 text-xs font-bold rounded-t-xs transition-colors cursor-pointer border-t border-x whitespace-nowrap ${
+                activeTab === 'portfolio'
+                  ? 'bg-white text-[#12355B] border-[#D5DCE3] border-b-white -mb-px shadow-xs'
+                  : 'text-[#5B6573] border-transparent hover:text-[#12355B]'
+              }`}
+            >
+              7. Proof of Work ({worker.portfolio?.length || 0})
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('verification')}
+              className={`px-3 py-2 text-xs font-bold rounded-t-xs transition-colors cursor-pointer border-t border-x whitespace-nowrap ${
+                activeTab === 'verification'
+                  ? 'bg-white text-[#12355B] border-[#D5DCE3] border-b-white -mb-px shadow-xs'
+                  : 'text-[#5B6573] border-transparent hover:text-[#12355B]'
+              }`}
+            >
+              8. Verification & KYC
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('insurance')}
               className={`px-3 py-2 text-xs font-bold rounded-t-xs transition-colors cursor-pointer border-t border-x whitespace-nowrap ${
                 activeTab === 'insurance'
-                  ? 'bg-white text-[#12355B] border-[#D5DCE3] border-b-white -mb-px'
+                  ? 'bg-white text-[#12355B] border-[#D5DCE3] border-b-white -mb-px shadow-xs'
                   : 'text-[#5B6573] border-transparent hover:text-[#12355B]'
               }`}
             >
-              3. Insurance
+              9. Insurance
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('remarks')}
               className={`px-3 py-2 text-xs font-bold rounded-t-xs transition-colors cursor-pointer border-t border-x whitespace-nowrap ${
                 activeTab === 'remarks'
-                  ? 'bg-white text-[#12355B] border-[#D5DCE3] border-b-white -mb-px'
+                  ? 'bg-white text-[#12355B] border-[#D5DCE3] border-b-white -mb-px shadow-xs'
                   : 'text-[#5B6573] border-transparent hover:text-[#12355B]'
               }`}
             >
-              4. Remarks & Status
+              10. Remarks & Status
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('activity')}
               className={`px-3 py-2 text-xs font-bold rounded-t-xs transition-colors cursor-pointer border-t border-x whitespace-nowrap ${
                 activeTab === 'activity'
-                  ? 'bg-white text-[#12355B] border-[#D5DCE3] border-b-white -mb-px'
+                  ? 'bg-white text-[#12355B] border-[#D5DCE3] border-b-white -mb-px shadow-xs'
                   : 'text-[#5B6573] border-transparent hover:text-[#12355B]'
               }`}
             >
-              5. Activity Log ({worker.activityLogs.length})
+              11. Activity Log ({worker.activityLogs?.length || 0})
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('performance')}
               className={`px-3 py-2 text-xs font-bold rounded-t-xs transition-colors cursor-pointer border-t border-x whitespace-nowrap ${
                 activeTab === 'performance'
-                  ? 'bg-white text-[#12355B] border-[#D5DCE3] border-b-white -mb-px'
+                  ? 'bg-white text-[#12355B] border-[#D5DCE3] border-b-white -mb-px shadow-xs'
                   : 'text-[#5B6573] border-transparent hover:text-[#12355B]'
               }`}
             >
-              6. Performance & Reviews
+              12. Performance & Reviews
             </button>
           </div>
 
@@ -350,11 +437,18 @@ export const WorkerDetailsModal: React.FC<WorkerDetailsModalProps> = ({
                         <p className="text-xs font-mono font-bold text-[#12355B]">
                           WORKER ID: {worker.id}
                         </p>
-                        <div className="flex items-center gap-2 text-xs text-[#5B6573]">
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-[#5B6573]">
                           <Phone className="w-3.5 h-3.5" />
-                          <span className="font-mono">{worker.phone}</span>
+                          <span className="font-mono">{worker.phone || 'Not provided'}</span>
+                          {worker.email && (
+                            <>
+                              <span>•</span>
+                              <Mail className="w-3.5 h-3.5" />
+                              <span>{worker.email}</span>
+                            </>
+                          )}
                           <span>•</span>
-                          <span className="font-semibold text-[#12355B]">{worker.category}</span>
+                          <span className="font-semibold text-[#12355B]">{worker.primarySkill || worker.category || 'Not provided'}</span>
                         </div>
                       </div>
                     </div>
@@ -374,12 +468,14 @@ export const WorkerDetailsModal: React.FC<WorkerDetailsModalProps> = ({
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                     <div>
                       <span className="text-[10px] uppercase font-bold text-[#5B6573] block">Trade Experience</span>
-                      <p className="font-semibold text-[#1F2933] mt-0.5">{worker.yearsOfExperience} Years Verified</p>
+                      <p className="font-semibold text-[#1F2933] mt-0.5">
+                        {worker.yearsOfExperience !== undefined ? `${worker.yearsOfExperience} Years Verified` : 'Not provided'}
+                      </p>
                     </div>
 
                     <div>
-                      <span className="text-[10px] uppercase font-bold text-[#5B6573] block">Working Hours</span>
-                      <p className="text-[#1F2933] mt-0.5">{worker.workingHours}</p>
+                      <span className="text-[10px] uppercase font-bold text-[#5B6573] block">Skill Level</span>
+                      <p className="font-semibold text-[#12355B] mt-0.5">{worker.skillLevel || 'Not provided'}</p>
                     </div>
 
                     <div>
@@ -397,13 +493,13 @@ export const WorkerDetailsModal: React.FC<WorkerDetailsModalProps> = ({
 
                     <div className="sm:col-span-2">
                       <span className="text-[10px] uppercase font-bold text-[#5B6573] block">Designated Service Area</span>
-                      <p className="text-[#1F2933] font-medium mt-0.5">{worker.serviceArea}</p>
-                      <p className="text-[10px] text-[#5B6573] mt-0.5">Base Station: {worker.location}</p>
+                      <p className="text-[#1F2933] font-medium mt-0.5">{worker.serviceArea || 'Not provided'}</p>
+                      <p className="text-[10px] text-[#5B6573] mt-0.5">Base Station: {worker.location || 'Not provided'}</p>
                     </div>
 
                     <div>
                       <span className="text-[10px] uppercase font-bold text-[#5B6573] block">Registry Registration</span>
-                      <p className="text-[#5B6573] mt-0.5">{worker.joinedDate}</p>
+                      <p className="text-[#5B6573] mt-0.5">{worker.joinedDate || 'Not provided'}</p>
                     </div>
                   </div>
 
@@ -414,88 +510,86 @@ export const WorkerDetailsModal: React.FC<WorkerDetailsModalProps> = ({
                     </span>
                     <div className="flex flex-wrap gap-1.5">
                       <span className="px-2.5 py-1 rounded-xs bg-[#12355B] text-white text-[11px] font-semibold">
-                        ★ Primary: {worker.category}
+                        ★ Primary: {worker.primarySkill || worker.category || 'Not provided'}
                       </span>
-                      {worker.skills.map((skill, i) => (
-                        <span
-                          key={i}
-                          className="px-2.5 py-1 rounded-xs bg-[#F4F6F8] text-[#1F2933] border border-[#D5DCE3] text-[11px] font-medium"
-                        >
-                          {skill}
-                        </span>
-                      ))}
+                      {worker.skills && worker.skills.length > 0 ? (
+                        worker.skills.map((skill, i) => (
+                          <span
+                            key={i}
+                            className="px-2.5 py-1 rounded-xs bg-[#F4F6F8] text-[#1F2933] border border-[#D5DCE3] text-[11px] font-medium"
+                          >
+                            {skill}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-xs text-[#8795A5] italic">No additional skill tags provided</span>
+                      )}
                     </div>
                   </div>
+                </div>
+              </div>
+            )}
 
-                  {/* Aadhaar & Identity Verification Dossier Card */}
-                  <div className="pt-3 border-t border-[#D5DCE3] space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <ShieldCheck className="w-4 h-4 text-[#2E7D32]" />
-                        <span className="text-[11px] uppercase font-bold text-[#12355B]">
-                          Aadhaar & Biometric Verification Dossier
-                        </span>
-                      </div>
-                      <span
-                        className={`text-[10px] font-semibold px-2 py-0.5 rounded-xs border ${
-                          worker.approvalStatus === 'Approved'
-                            ? 'text-[#2E7D32] bg-[#E8F5E9] border-[#C8E6C9]'
-                            : worker.approvalStatus === 'Rejected'
-                            ? 'text-[#B42318] bg-red-50 border-red-200'
-                            : 'text-[#B26A00] bg-amber-50 border-amber-200'
-                        }`}
-                      >
-                        KYC {worker.approvalStatus === 'Approved' ? 'Verified & Active' : worker.approvalStatus === 'Rejected' ? 'Rejected' : 'Pending Review'}
-                      </span>
+            {/* TAB 2: SERVICES & TOOLS */}
+            {activeTab === 'services' && (
+              <div className="space-y-4">
+                <div className="bg-white p-4 rounded-sm border border-[#D5DCE3] shadow-xs space-y-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-[#D5DCE3]">
+                    <div className="flex items-center gap-2">
+                      <Wrench className="w-4 h-4 text-[#1C4E80]" />
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#12355B]">
+                        Authorized Services & Field Tool Inventory
+                      </h4>
                     </div>
+                    <span className="text-[10px] text-[#5B6573] italic">
+                      Live Mirror from Worker Field Profile
+                    </span>
+                  </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#F8FAFC] p-3 rounded-xs border border-[#E2E8F0]">
-                      {/* Aadhaar Card Record */}
-                      <div className="space-y-1">
-                        <span className="text-[10px] uppercase font-bold text-[#5B6573] block">
-                          Aadhaar Number (UIDAI)
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono font-bold text-sm text-[#1F2933]">
-                            {worker.aadhaarNumberMasked || 'XXXX-XXXX-0124'}
-                          </span>
-                          <span className="text-[10px] font-semibold text-[#2E7D32] bg-emerald-50 px-1.5 py-0.5 rounded-xs border border-emerald-200">
-                            ✓ OTP Verified
-                          </span>
-                        </div>
-                        <p className="text-[10px] text-[#5B6573]">
-                          Verhoeff checksum validated during worker onboarding.
-                        </p>
-                      </div>
-
-                      {/* Live Selfie Verification */}
-                      <div className="space-y-1">
-                        <span className="text-[10px] uppercase font-bold text-[#5B6573] block">
-                          Biometric Live Selfie
-                        </span>
-                        <div className="flex items-center gap-3">
-                          {worker.image && (
-                            <img
-                              src={worker.image}
-                              alt="Selfie verification"
-                              className="w-12 h-12 rounded-xs object-cover border border-[#BAC7D5]"
-                            />
-                          )}
-                          <div>
-                            <span className="text-[10px] font-semibold text-[#1C4E80] bg-[#EAF2F8] px-1.5 py-0.5 rounded-xs border border-[#BAC7D5] block w-fit">
-                              ✓ Live Selfie Verified
-                            </span>
-                            <span className="text-[10px] text-[#5B6573] block mt-0.5">
-                              Face match and liveness confirmed.
-                            </span>
+                  {/* Services Offered */}
+                  <div className="space-y-2">
+                    <span className="text-[11px] uppercase font-bold text-[#12355B] block">
+                      Services Offered ({worker.servicesOffered?.length || 0})
+                    </span>
+                    {worker.servicesOffered && worker.servicesOffered.length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {worker.servicesOffered.map((service, idx) => (
+                          <div
+                            key={idx}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F0F7FF] text-[#12355B] border border-[#BAC7D5] rounded-xs text-xs font-semibold"
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5 text-[#2E7D32]" />
+                            <span>{service}</span>
                           </div>
-                        </div>
+                        ))}
                       </div>
-                    </div>
+                    ) : (
+                      <div className="p-4 text-center bg-[#F4F6F8] rounded-xs border border-[#D5DCE3] text-xs text-[#8795A5] italic">
+                        Not provided
+                      </div>
+                    )}
+                  </div>
 
-                    {worker.rejectionReason && (
-                      <div className="p-2.5 bg-red-50 border border-red-200 rounded-xs text-xs text-red-700">
-                        <strong>Rejection Reason:</strong> {worker.rejectionReason}
+                  {/* Tools & Equipment */}
+                  <div className="pt-3 border-t border-[#D5DCE3] space-y-2">
+                    <span className="text-[11px] uppercase font-bold text-[#12355B] block">
+                      Tools & Equipment In Possession ({worker.toolsAndEquipment?.length || 0})
+                    </span>
+                    {worker.toolsAndEquipment && worker.toolsAndEquipment.length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {worker.toolsAndEquipment.map((tool, idx) => (
+                          <div
+                            key={idx}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F4F6F8] text-[#1F2933] border border-[#D5DCE3] rounded-xs text-xs font-medium"
+                          >
+                            <Wrench className="w-3 h-3 text-[#5B6573]" />
+                            <span>{tool}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-4 text-center bg-[#F4F6F8] rounded-xs border border-[#D5DCE3] text-xs text-[#8795A5] italic">
+                        Not provided
                       </div>
                     )}
                   </div>
@@ -503,7 +597,214 @@ export const WorkerDetailsModal: React.FC<WorkerDetailsModalProps> = ({
               </div>
             )}
 
-            {/* TAB 2: CERTIFICATIONS */}
+            {/* TAB 3: WORK PREFERENCES */}
+            {activeTab === 'preferences' && (
+              <div className="space-y-4">
+                <div className="bg-white p-4 rounded-sm border border-[#D5DCE3] shadow-xs space-y-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-[#D5DCE3]">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-[#1C4E80]" />
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#12355B]">
+                        Availability Schedule & Work Preferences
+                      </h4>
+                    </div>
+                    <span className="text-[10px] text-[#5B6573] italic">
+                      Live Mirror from Worker App
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="p-3 bg-[#F4F6F8] rounded-xs border border-[#D5DCE3] space-y-1">
+                      <span className="text-[10px] uppercase font-bold text-[#5B6573] block">Work Arrangement Type</span>
+                      <p className="text-xs font-semibold text-[#1F2933]">
+                        {worker.workType || 'Not provided'}
+                      </p>
+                    </div>
+
+                    <div className="p-3 bg-[#F4F6F8] rounded-xs border border-[#D5DCE3] space-y-1">
+                      <span className="text-[10px] uppercase font-bold text-[#5B6573] block">Working Hours Window</span>
+                      <p className="text-xs font-semibold font-mono text-[#12355B]">
+                        {worker.workingHoursStart && worker.workingHoursEnd
+                          ? `${worker.workingHoursStart} - ${worker.workingHoursEnd}`
+                          : worker.workingHours || 'Not provided'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Available Days */}
+                  <div className="pt-2 border-t border-[#D5DCE3] space-y-2">
+                    <span className="text-[11px] uppercase font-bold text-[#12355B] block">
+                      Operating Work Days
+                    </span>
+                    {worker.availableDays && worker.availableDays.length > 0 ? (
+                      <div className="grid grid-cols-2 sm:grid-cols-7 gap-2">
+                        {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => {
+                          const isAvailable = worker.availableDays?.some(
+                            (d) => d.toLowerCase() === day.toLowerCase()
+                          );
+                          return (
+                            <div
+                              key={day}
+                              className={`p-2.5 rounded-xs border text-center text-xs font-semibold transition-colors ${
+                                isAvailable
+                                  ? 'bg-[#E8F5E9] text-[#2E7D32] border-[#C8E6C9]'
+                                  : 'bg-[#F4F6F8] text-[#8795A5] border-[#D5DCE3]'
+                              }`}
+                            >
+                              <div className="text-[10px] uppercase font-bold">{day.slice(0, 3)}</div>
+                              <div className="text-[11px] mt-0.5">{isAvailable ? '✓ Active' : 'Off'}</div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="p-4 text-center bg-[#F4F6F8] rounded-xs border border-[#D5DCE3] text-xs text-[#8795A5] italic">
+                        Not provided
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 4: LOCATION & AREA */}
+            {activeTab === 'location' && (
+              <div className="space-y-4">
+                <div className="bg-white p-4 rounded-sm border border-[#D5DCE3] shadow-xs space-y-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-[#D5DCE3]">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-[#1C4E80]" />
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#12355B]">
+                        Geographic Location & Operating Sectors
+                      </h4>
+                    </div>
+                    <span className="text-[10px] text-[#5B6573] italic">
+                      Dispatch & Service Jurisdiction
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                    <div className="p-3 bg-[#F4F6F8] rounded-xs border border-[#D5DCE3] space-y-1">
+                      <span className="text-[10px] uppercase font-bold text-[#5B6573] block">Residential Address</span>
+                      <p className="font-semibold text-[#1F2933]">{worker.currentAddress || 'Not provided'}</p>
+                    </div>
+
+                    <div className="p-3 bg-[#F4F6F8] rounded-xs border border-[#D5DCE3] space-y-1">
+                      <span className="text-[10px] uppercase font-bold text-[#5B6573] block">City & Postal Pincode</span>
+                      <p className="font-semibold text-[#1F2933]">
+                        {worker.city ? `${worker.city}` : 'Not provided'}
+                        {worker.pincode ? ` - ${worker.pincode}` : ''}
+                      </p>
+                    </div>
+
+                    <div className="p-3 bg-[#F4F6F8] rounded-xs border border-[#D5DCE3] space-y-1">
+                      <span className="text-[10px] uppercase font-bold text-[#5B6573] block">Base Station / Zone</span>
+                      <p className="font-semibold text-[#1F2933]">{worker.location || 'Not provided'}</p>
+                    </div>
+
+                    <div className="p-3 bg-[#F4F6F8] rounded-xs border border-[#D5DCE3] space-y-1">
+                      <span className="text-[10px] uppercase font-bold text-[#5B6573] block">Designated Service Area</span>
+                      <p className="font-semibold text-[#12355B]">{worker.serviceArea || 'Not provided'}</p>
+                    </div>
+                  </div>
+
+                  {/* Preferred Working Areas */}
+                  <div className="pt-2 border-t border-[#D5DCE3] space-y-2">
+                    <span className="text-[11px] uppercase font-bold text-[#12355B] block">
+                      Preferred Working Sectors / Societies ({worker.preferredWorkingAreas?.length || 0})
+                    </span>
+                    {worker.preferredWorkingAreas && worker.preferredWorkingAreas.length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {worker.preferredWorkingAreas.map((area, idx) => (
+                          <span
+                            key={idx}
+                            className="inline-flex items-center gap-1 px-3 py-1 bg-[#EAF2F8] text-[#12355B] border border-[#BAC7D5] rounded-xs text-xs font-semibold"
+                          >
+                            <MapPin className="w-3 h-3 text-[#1C4E80]" />
+                            {area}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-4 text-center bg-[#F4F6F8] rounded-xs border border-[#D5DCE3] text-xs text-[#8795A5] italic">
+                        Not provided
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 5: PROFESSIONAL BIO */}
+            {activeTab === 'bio' && (
+              <div className="space-y-4">
+                <div className="bg-white p-4 rounded-sm border border-[#D5DCE3] shadow-xs space-y-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-[#D5DCE3]">
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="w-4 h-4 text-[#1C4E80]" />
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#12355B]">
+                        Professional Bio & Background
+                      </h4>
+                    </div>
+                    <span className="text-[10px] text-[#5B6573] italic">
+                      Worker Self-Declaration
+                    </span>
+                  </div>
+
+                  {/* About Me */}
+                  <div className="space-y-1.5">
+                    <span className="text-[11px] uppercase font-bold text-[#12355B] block">About Me</span>
+                    <div className="p-3 bg-[#F4F6F8] rounded-xs border border-[#D5DCE3] text-xs text-[#1F2933] leading-relaxed">
+                      {worker.aboutMe ? (
+                        <p>{worker.aboutMe}</p>
+                      ) : (
+                        <span className="text-[#8795A5] italic">Not provided</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Previous Experience */}
+                  <div className="pt-2 border-t border-[#D5DCE3] space-y-1.5">
+                    <span className="text-[11px] uppercase font-bold text-[#12355B] block">
+                      Previous Work Experience & History
+                    </span>
+                    <div className="p-3 bg-[#F4F6F8] rounded-xs border border-[#D5DCE3] text-xs text-[#1F2933] leading-relaxed">
+                      {worker.previousWorkExperience ? (
+                        <p>{worker.previousWorkExperience}</p>
+                      ) : (
+                        <span className="text-[#8795A5] italic">Not provided</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Training Completed */}
+                  <div className="pt-2 border-t border-[#D5DCE3] space-y-1.5">
+                    <span className="text-[11px] uppercase font-bold text-[#12355B] block">
+                      Formal Vocational Training Completed
+                    </span>
+                    {worker.trainingCompleted && worker.trainingCompleted.length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {worker.trainingCompleted.map((t, idx) => (
+                          <div
+                            key={idx}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F0FDF4] text-[#166534] border border-[#BBF7D0] rounded-xs text-xs font-semibold"
+                          >
+                            <Award className="w-3.5 h-3.5 text-[#2E7D32]" />
+                            <span>{t}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-3 bg-[#F4F6F8] rounded-xs border border-[#D5DCE3] text-xs text-[#8795A5] italic">
+                        Not provided
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 6: CERTIFICATIONS */}
             {activeTab === 'certifications' && (
               <div className="space-y-4">
                 <div className="bg-white p-4 rounded-sm border border-[#D5DCE3] shadow-xs space-y-3">
@@ -560,7 +861,187 @@ export const WorkerDetailsModal: React.FC<WorkerDetailsModalProps> = ({
               </div>
             )}
 
-            {/* TAB 3: INSURANCE */}
+            {/* TAB 7: PROOF OF WORK / PORTFOLIO */}
+            {activeTab === 'portfolio' && (
+              <div className="space-y-4">
+                <div className="bg-white p-4 rounded-sm border border-[#D5DCE3] shadow-xs space-y-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-[#D5DCE3]">
+                    <div className="flex items-center gap-2">
+                      <Camera className="w-4 h-4 text-[#1C4E80]" />
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#12355B]">
+                        Proof of Work / Portfolio Gallery ({worker.portfolio?.length || 0})
+                      </h4>
+                    </div>
+                    <span className="text-[10px] text-[#5B6573] italic">
+                      Click image to enlarge full resolution
+                    </span>
+                  </div>
+
+                  {!worker.portfolio || worker.portfolio.length === 0 ? (
+                    <div className="text-center py-10 bg-[#F4F6F8] rounded-xs border border-[#D5DCE3] text-xs text-[#8795A5] italic">
+                      No proof of work or portfolio items submitted by worker yet.
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                      {worker.portfolio.map((item, idx) => {
+                        const imgUrl = item.imageUrl || item.url;
+                        return (
+                          <div
+                            key={item.id || idx}
+                            className="bg-[#F8FAFC] rounded-xs border border-[#D5DCE3] overflow-hidden flex flex-col hover:border-[#12355B] transition-all group"
+                          >
+                            <div
+                              className="relative h-44 bg-[#0F172A] cursor-pointer overflow-hidden"
+                              onClick={() => setSelectedPortfolioItem({ url: imgUrl, title: item.title })}
+                            >
+                              <img
+                                src={imgUrl}
+                                alt={item.title}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                              />
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <span className="px-2.5 py-1 bg-white/90 text-[#12355B] text-[11px] font-bold rounded-xs shadow-xs">
+                                  Enlarge Image
+                                </span>
+                              </div>
+                              {item.serviceTag && (
+                                <span className="absolute top-2 left-2 px-2 py-0.5 bg-black/70 text-white text-[10px] font-semibold rounded-xs backdrop-blur-xs">
+                                  {item.serviceTag}
+                                </span>
+                              )}
+                            </div>
+                            <div className="p-3 flex-1 flex flex-col justify-between space-y-1">
+                              <div>
+                                <h5 className="text-xs font-bold text-[#1F2933] line-clamp-1">{item.title}</h5>
+                                <p className="text-[11px] text-[#5B6573] line-clamp-2 mt-0.5">
+                                  {item.description || 'Not provided'}
+                                </p>
+                              </div>
+                              {item.createdAt && (
+                                <span className="text-[9px] font-mono text-[#8795A5] pt-1 block">
+                                  {new Date(item.createdAt).toLocaleDateString()}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 8: VERIFICATION & KYC */}
+            {activeTab === 'verification' && (
+              <div className="space-y-4">
+                <div className="bg-white p-4 rounded-sm border border-[#D5DCE3] shadow-xs space-y-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-[#D5DCE3]">
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck className="w-4 h-4 text-[#2E7D32]" />
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#12355B]">
+                        Aadhaar & Biometric Verification Dossier
+                      </h4>
+                    </div>
+                    <span
+                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-xs border ${
+                        worker.approvalStatus === 'Approved'
+                          ? 'text-[#2E7D32] bg-[#E8F5E9] border-[#C8E6C9]'
+                          : worker.approvalStatus === 'Rejected'
+                          ? 'text-[#B42318] bg-red-50 border-red-200'
+                          : 'text-[#B26A00] bg-amber-50 border-amber-200'
+                      }`}
+                    >
+                      KYC {worker.approvalStatus === 'Approved' ? 'Verified & Active' : worker.approvalStatus === 'Rejected' ? 'Rejected' : 'Pending Review'}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#F8FAFC] p-3 rounded-xs border border-[#E2E8F0]">
+                    {/* Aadhaar Card Record */}
+                    <div className="space-y-1">
+                      <span className="text-[10px] uppercase font-bold text-[#5B6573] block">
+                        Aadhaar Number (UIDAI)
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-bold text-sm text-[#1F2933]">
+                          {worker.aadhaarNumberMasked || 'XXXX-XXXX-0124'}
+                        </span>
+                        <span className="text-[10px] font-semibold text-[#2E7D32] bg-emerald-50 px-1.5 py-0.5 rounded-xs border border-emerald-200">
+                          ✓ OTP Verified
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-[#5B6573]">
+                        Verhoeff checksum validated during worker onboarding. Unmasked Aadhaar strictly restricted.
+                      </p>
+                    </div>
+
+                    {/* Live Selfie Verification */}
+                    <div className="space-y-1">
+                      <span className="text-[10px] uppercase font-bold text-[#5B6573] block">
+                        Biometric Live Selfie
+                      </span>
+                      <div className="flex items-center gap-3">
+                        {worker.image ? (
+                          <div
+                            className="relative group cursor-pointer"
+                            onClick={() => setIsPhotoLightboxOpen(true)}
+                          >
+                            <img
+                              src={worker.image}
+                              alt="Selfie verification"
+                              className="w-14 h-14 rounded-xs object-cover border border-[#BAC7D5] group-hover:border-[#12355B]"
+                            />
+                            <span className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 rounded-xs flex items-center justify-center text-[9px] text-white font-bold transition-opacity">
+                              Enlarge
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="w-14 h-14 bg-gray-100 rounded-xs flex items-center justify-center text-[10px] text-gray-400">
+                            No photo
+                          </div>
+                        )}
+                        <div>
+                          <span className="text-[10px] font-semibold text-[#1C4E80] bg-[#EAF2F8] px-1.5 py-0.5 rounded-xs border border-[#BAC7D5] block w-fit">
+                            ✓ Live Selfie Verified
+                          </span>
+                          <span className="text-[10px] text-[#5B6573] block mt-0.5">
+                            Face match and liveness confirmed.
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div className="p-3 bg-[#F4F6F8] rounded-xs border border-[#D5DCE3] space-y-1">
+                      <span className="text-[10px] uppercase font-bold text-[#5B6573] block">Date of Birth</span>
+                      <p className="font-semibold text-[#1F2933]">
+                        {worker.dateOfBirth
+                          ? new Date(worker.dateOfBirth).toLocaleDateString('en-GB', {
+                              day: '2-digit',
+                              month: 'short',
+                              year: 'numeric',
+                            })
+                          : 'Not provided'}
+                      </p>
+                    </div>
+
+                    <div className="p-3 bg-[#F4F6F8] rounded-xs border border-[#D5DCE3] space-y-1">
+                      <span className="text-[10px] uppercase font-bold text-[#5B6573] block">Registry ID Reference</span>
+                      <p className="font-mono font-bold text-[#12355B]">{worker.id}</p>
+                    </div>
+                  </div>
+
+                  {worker.rejectionReason && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-xs text-xs text-red-700">
+                      <strong>Rejection Reason:</strong> {worker.rejectionReason}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 9: INSURANCE */}
             {activeTab === 'insurance' && (
               <div className="space-y-4">
                 <div className="bg-white p-4 rounded-sm border border-[#D5DCE3] shadow-xs space-y-4">
@@ -963,6 +1444,16 @@ export const WorkerDetailsModal: React.FC<WorkerDetailsModalProps> = ({
         subtitle={`Worker ID: ${worker.id} • Trade: ${worker.category}`}
         onClose={() => setIsPhotoLightboxOpen(false)}
       />
+
+      {selectedPortfolioItem && (
+        <ImageLightboxModal
+          isOpen={!!selectedPortfolioItem}
+          imageUrl={selectedPortfolioItem.url}
+          title={selectedPortfolioItem.title}
+          subtitle={`Proof of Work • Worker ID: ${worker.id}`}
+          onClose={() => setSelectedPortfolioItem(null)}
+        />
+      )}
 
       <WorkerEditProfileModal
         isOpen={isEditProfileOpen}

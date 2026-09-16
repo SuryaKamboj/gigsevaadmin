@@ -132,14 +132,43 @@ export interface WorkerReviewItem {
   date: string;
 }
 
+export interface WorkerPortfolioItem {
+  id: string;
+  url: string;
+  imageUrl?: string;
+  title: string;
+  description?: string;
+  serviceTag?: string;
+  createdAt?: string;
+}
+
 export interface WorkerItem {
   id: string; // e.g. WRK-2045
   name: string;
   phone: string;
   image: string;
   category: string; // Primary category
+  primarySkill?: string;
   skills: string[]; // Additional skills/categories
   yearsOfExperience: number;
+  skillLevel?: 'Beginner' | 'Intermediate' | 'Expert' | string;
+  servicesOffered?: string[];
+  toolsAndEquipment?: string[];
+  availableDays?: string[];
+  workingHoursStart?: string;
+  workingHoursEnd?: string;
+  workType?: 'Full-time' | 'Part-time' | string;
+  aboutMe?: string;
+  previousWorkExperience?: string;
+  trainingCompleted?: string[];
+  portfolio?: WorkerPortfolioItem[];
+  currentAddress?: string;
+  city?: string;
+  pincode?: string;
+  preferredWorkingAreas?: string[];
+  dateOfBirth?: string;
+  gender?: string;
+  email?: string;
   joinedDate: string;
   location: string;
   serviceArea: string;
