@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AdminNavTab, JobItem, NavigationSourceContext, SecurityTab, AuthUserSession } from './types';
-import { MOCK_JOBS, MOCK_WORKERS, MOCK_USERS } from './data/mockData';
+import { MOCK_WORKERS, MOCK_USERS } from './data/mockData';
 import { AdminSidebar } from './components/AdminSidebar';
 import { AdminHeader } from './components/AdminHeader';
 import { AdminLoginPage } from './pages/AdminLoginPage';
@@ -95,19 +95,17 @@ export const App: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Single Source of Truth for Jobs Across Admin Modules
-  const [jobs, setJobs] = useState<JobItem[]>(MOCK_JOBS);
+  const [jobs, setJobs] = useState<JobItem[]>([]);
 
   const fetchLiveBookings = async () => {
     try {
       const res = await adminService.getBookings();
       const rawList = res?.data || res || [];
-      if (Array.isArray(rawList) && rawList.length > 0) {
+      if (Array.isArray(rawList)) {
         const liveMapped = rawList.map(mapBackendBookingToJobItem);
-        setJobs(prev => {
-          const liveIds = new Set(liveMapped.map(j => j.id));
-          const filteredMock = prev.filter(j => !liveIds.has(j.id));
-          return [...liveMapped, ...filteredMock];
-        });
+        setJobs(liveMapped);
+      } else {
+        setJobs([]);
       }
     } catch (err) {
       console.warn('[AdminApp] Fetch bookings notice:', err);

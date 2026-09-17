@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { UserItem, UserAccountStatus, JobItem, NavigationSourceContext } from '../types';
-import { MOCK_JOBS } from '../data/mockData';
 import { adminService } from '../services/adminService';
 import { UserTable } from '../components/UserTable';
 import { UserCard } from '../components/UserCard';
@@ -32,7 +31,7 @@ interface UserManagementPageProps {
 }
 
 export const UserManagementPage: React.FC<UserManagementPageProps> = ({
-  jobs = MOCK_JOBS,
+  jobs = [],
   initialUserId,
   navContext,
   navStack = [],

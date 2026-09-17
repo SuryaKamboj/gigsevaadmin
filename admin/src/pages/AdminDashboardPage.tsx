@@ -12,7 +12,6 @@ import {
 import {
   MOCK_USERS,
   MOCK_WORKERS,
-  MOCK_JOBS,
   MOCK_COMPLAINTS,
   MOCK_TRANSACTIONS,
   MOCK_PLATFORM_COMMISSIONS,
@@ -68,7 +67,7 @@ interface AdminDashboardPageProps {
 }
 
 export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
-  jobs = MOCK_JOBS,
+  jobs = [],
   users = MOCK_USERS,
   workers = MOCK_WORKERS,
   complaints = MOCK_COMPLAINTS,

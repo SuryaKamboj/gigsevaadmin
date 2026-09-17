@@ -8,7 +8,6 @@ import {
   JobItem,
   NavigationSourceContext,
 } from '../types';
-import { MOCK_JOBS } from '../data/mockData';
 import { adminService } from '../services/adminService';
 import { WorkerTable } from '../components/WorkerTable';
 import { WorkerCard } from '../components/WorkerCard';
@@ -54,7 +53,7 @@ interface WorkerManagementPageProps {
 }
 
 export const WorkerManagementPage: React.FC<WorkerManagementPageProps> = ({
-  jobs = MOCK_JOBS,
+  jobs = [],
   initialWorkerId,
   initialViewTab = 'registry',
   navContext,

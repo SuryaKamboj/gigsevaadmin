@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { JobItem, NavigationSourceContext } from '../types';
-import { MOCK_JOBS } from '../data/mockData';
 import { JobTable } from '../components/JobTable';
 import { JobCard } from '../components/JobCard';
 import { Pagination } from '../components/Pagination';
@@ -62,7 +61,7 @@ export const JobManagementPage: React.FC<JobManagementPageProps> = ({
   onViewWorkerProfile,
   onNavigateToPayment,
 }) => {
-  const jobs = passedJobs || MOCK_JOBS;
+  const jobs = passedJobs || [];
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string>(initialStatusFilter || 'All');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -137,11 +136,21 @@ export const JobManagementPage: React.FC<JobManagementPageProps> = ({
 
       // Date Filter
       if (selectedDateFilter === 'Today') {
-        if (!job.scheduledDate.includes('09 Sep 2026') && !job.createdDate.includes('09 Sep 2026')) return false;
+        const todayStr = new Date().toISOString().split('T')[0];
+        const isToday = (job.scheduledDate && job.scheduledDate.includes(todayStr)) ||
+          (job.createdDate && job.createdDate.includes(todayStr)) ||
+          (job.createdDate && new Date(job.createdDate).toDateString() === new Date().toDateString());
+        if (!isToday) return false;
       } else if (selectedDateFilter === 'This Week') {
-        if (!job.scheduledDate.includes('Sep 2026')) return false;
+        const now = new Date();
+        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        const jobDate = new Date(job.createdDate || job.scheduledDate);
+        if (jobDate < weekAgo) return false;
       } else if (selectedDateFilter === 'This Month') {
-        if (!job.scheduledDate.includes('2026')) return false;
+        const now = new Date();
+        const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        const jobDate = new Date(job.createdDate || job.scheduledDate);
+        if (jobDate < monthAgo) return false;
       }
 
       // Real-time Search Query Filter (Job ID, Customer Name, Worker Name, Service)
